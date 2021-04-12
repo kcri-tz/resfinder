@@ -103,7 +103,7 @@ class Isolate(dict):
                 phenodb_id = ref_id
             # Amino acid mutation
             else:
-                phenodb_id = ref_id[:-3] + feat_res_dict["var_aa"]
+                phenodb_id = ref_id[:-1] + feat_res_dict["var_aa"]
             return phenodb_id
 
         elif(type == "genes"):
@@ -116,7 +116,6 @@ class Isolate(dict):
                and re.search("PointFinder", feat_info["ref_database"])):
                continue
             unique_id = Isolate.get_phenodb_id(feat_info, type)
-
             phenotypes = phenodb.get(unique_id, None)
             ab_class = set()
             if(phenotypes):
@@ -144,7 +143,6 @@ class Isolate(dict):
             nucleotide_mut = True
         else:
             nucleotide_mut = False
-
         feat_res = ResMutation(unique_id=unique_id,
                                seq_region=";;".join(feat_info["genes"]),
                                pos=feat_info["ref_start_pos"],
@@ -255,7 +253,6 @@ class Isolate(dict):
                         nucleotide_mut = True
                     else:
                         nucleotide_mut = False
-
                     feat_res = ResMutation(unique_id=unique_id,
                                            seq_region=feature["template_name"],
                                            pos=feature["query_start_pos"],
