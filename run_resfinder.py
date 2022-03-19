@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import os
+import re
 import subprocess
 from argparse import ArgumentParser
 import pickle
@@ -26,6 +27,9 @@ import json
 # #########                                 FUNCTIONS               ######### #
 # ########################################################################### #
 
+def get_git_tag():
+    # Zwets: see https://bitbucket.org/genomicepidemiology/resfinder/issues/74/run_resfinderpy-aborts-on-git-error
+    return "4.1.11"   # see https://bitbucket.org/genomicepidemiology/resfinder/issues/74/run_resfinderpy-aborts-on-git-error
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
@@ -160,6 +164,8 @@ parser.add_argument("-t_p", "--threshold_point",
                           ResFinder will be used.",
                     type=float,
                     default=None)
+parser.add_argument("-v", "--version", action="version", version=get_git_tag(),
+                    help="Show program's version number and exit")
 # Temporary option only available temporary
 parser.add_argument("--pickle",
                     action="store_true",
@@ -185,6 +191,10 @@ if(args.min_cov > 1.0 or args.min_cov < 0.0):
 if(args.threshold > 1.0 or args.threshold < 0.0):
     sys.exit("ERROR: Threshold for identity of ResFinder above 1 or below 0 is not allowed. Please select a threshold for identity within the range 0-1 with the flag -t.")
 
+# Check if input file is given
+if not (args.inputfasta or args.inputfastq):
+    sys.exit("ERROR: No input file given. Please provide path(s) to input file(s) either using "
+             "--inputfasta or --inputfastq.")
 
 # Create a "sample" name
 if(args.inputfasta):
@@ -285,7 +295,7 @@ os.makedirs(args.out_path, exist_ok=True)
 
 if args.acquired is False and args.point is False:
     sys.exit("Please specify to look for acquired resistance genes, "
-             "chromosomal mutaitons or both!\n")
+             "chromosomal mutations or both!\n")
 
 # Check ResFinder database
 if(args.db_path_res is None):
