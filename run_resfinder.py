@@ -28,22 +28,8 @@ import json
 # ########################################################################### #
 
 def get_git_tag():
-    git_folders_path = os.path.dirname(os.path.realpath(__file__))
-    try:
-        git_tag = str(
-            subprocess.check_output(
-                ['git', 'describe', '--tags', '--abbrev=0'],
-                stderr=subprocess.STDOUT, cwd=git_folders_path,
-            )).strip('\'b\\n')
-    except subprocess.CalledProcessError as exc_info:
-        match = re.search(
-            'fatal: no tag exactly matches \'(?P<commit>[a-z0-9]+)\'', str(exc_info.output))
-        if match:
-            raise Exception(
-                'Bailing: there is no git tag for the current commit, {commit}'.format(
-                commit=match.group('commit')))
-        raise Exception(str(exc_info.output))
-    return git_tag
+    # Zwets: see https://bitbucket.org/genomicepidemiology/resfinder/issues/74/run_resfinderpy-aborts-on-git-error
+    return "4.1.11"   # see https://bitbucket.org/genomicepidemiology/resfinder/issues/74/run_resfinderpy-aborts-on-git-error
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
