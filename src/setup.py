@@ -1,4 +1,4 @@
-from setuptools import setup
-setup(name='resfinder', packages=['resfinder'], entry_points={"console_scripts": ['resfinder = resfinder.run_resfinder']}, zip_safe=False,
-      version='4.2.1.0'
+from setuptools import setup, find_packages
+setup(name='resfinder', packages=find_packages(exclude=['scripts','tests']), entry_points={"console_scripts": ['resfinder = resfinder.run_resfinder']}, zip_safe=False,
+      version='4.2.1.1'
       )
