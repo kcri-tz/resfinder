@@ -410,10 +410,6 @@ class PointFinder(CGEFinder):
         gene_db_id = gene_ref_id.replace("_", ";;")
         known = []
         for mis_match in mis_matches:
-            # Zwets: temporary patch for:
-            # https://bitbucket.org/genomicepidemiology/resfinder/issues/86/pointfinder-breaks-on-23s-hit
-            #mis_match_key = (f"{gene_db_id}_{mis_match[1]}"
-            #                 f"_{mis_match[8].lower()}")
             mis_match_key = (f"{gene_db_id}_{mis_match[1]}"
                              f"_{mis_match[-1].lower()}")
             if mis_match_key in phenodb:
