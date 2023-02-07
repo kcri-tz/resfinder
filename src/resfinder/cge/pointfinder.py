@@ -413,7 +413,7 @@ class PointFinder(CGEFinder):
     @staticmethod
     def _get_known_mis_matches(entry_key, mis_matches, phenodb):
         try:
-            gene_ref_id = entry_key.split(":")[2]
+            gene_ref_id = entry_key.split(":")[-2]
         except:
             gene_ref_id = entry_key
         gene_db_id = gene_ref_id.replace("_", ";;")
