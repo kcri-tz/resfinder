@@ -6,6 +6,7 @@ import subprocess
 from argparse import ArgumentParser
 import pickle
 import json
+import hashlib
 
 from cgelib.output.result import Result
 from cgelib.utils.loaders_mixin import LoadersMixin
@@ -28,6 +29,23 @@ from resfinder import __version__
 
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
+
+
+def get_software_exec_res(conf: Config) -> dict:
+    software_exec_res = {
+        "type": "software_exec",
+        "command": " ".join(sys.argv),
+        "parameters": get_call_parameters(conf)
+    }
+    software_exec_res["key"] = hashlib.sha1(
+        bytes(software_exec_res["command"], 'UTF-8')).hexdigest()
+    return software_exec_res
+
+
+def get_call_parameters(conf: Config) -> dict:
+    parameters = vars(conf).copy()
+    del (parameters['amr_abbreviations'])
+    return parameters
 
 
 def main():
@@ -206,12 +224,15 @@ def main():
     }
     std_result.add(**init_result_data)
 
-    if(conf.acquired):
+    if conf.acquired:
         std_result.init_database("ResFinder", conf.db_path_res)
-    if(conf.point):
+    if conf.point:
         std_result.init_database("PointFinder", conf.db_path_point_root)
-    if(conf.disinf):
+    if conf.disinf:
         std_result.init_database("DisinFinder", conf.db_path_disinf)
+
+    std_result.add_class(cl="software_executions", **
+                         get_software_exec_res(conf))
 
     # Load genotype to phenotype database
     res_pheno_db = PhenoDB(
@@ -226,7 +247,7 @@ def main():
     # ResFinder
     ##########################################################################
 
-    if(conf.acquired is True):
+    if conf.acquired is True:
 
         blast_results = None
         kma_run = None
@@ -238,7 +259,7 @@ def main():
                                     notes=conf.db_notes_file,
                                     db_path_kma=conf.db_path_res_kma)
 
-        if(conf.inputfasta):
+        if (conf.inputfasta):
             blast_results = acquired_finder.blast(
                 inputfile=conf.inputfasta,
                 out_path=conf.outPath_res_blast,
@@ -256,12 +277,12 @@ def main():
                                           software="ResFinder")
 
             ResFinderResultHandler.standardize_results(std_result,
-                                                       blast_results.results,
+                                                       blast_results,
                                                        "ResFinder",
                                                        conf)
 
         else:
-            if(conf.nanopore):
+            if (conf.nanopore):
                 kma_run = acquired_finder.kma(
                     inputfile_1=conf.inputfastq_1,
                     inputfile_2=conf.inputfastq_2,
@@ -301,13 +322,13 @@ def main():
                                           software="ResFinder")
 
             ResFinderResultHandler.standardize_results(std_result,
-                                                       kma_run.results,
+                                                       kma_run,
                                                        "ResFinder",
                                                        conf)
     ##########################################################################
     # DisinFinder
     ##########################################################################
-    if(conf.disinf is True):
+    if (conf.disinf is True):
 
         blast_results = None
         kma_run = None
@@ -319,7 +340,7 @@ def main():
                                   notes=conf.db_notes_disinf_file,
                                   db_path_kma=conf.db_path_disinf_kma)
 
-        if(conf.inputfasta):
+        if (conf.inputfasta):
             blast_results = disinf_finder.blast(
                 inputfile=conf.inputfasta,
                 out_path=conf.outPath_disinf_blast,
@@ -337,12 +358,12 @@ def main():
                                         software="DisinFinder")
 
             ResFinderResultHandler.standardize_results(std_result,
-                                                       blast_results.results,
+                                                       blast_results,
                                                        "DisinFinder",
                                                        conf)
 
         else:
-            if(conf.nanopore):
+            if (conf.nanopore):
                 kma_run = disinf_finder.kma(
                     inputfile_1=conf.inputfastq_1,
                     inputfile_2=conf.inputfastq_2,
@@ -382,14 +403,14 @@ def main():
                                         software="DisinFinder")
 
             ResFinderResultHandler.standardize_results(std_result,
-                                                       kma_run.results,
+                                                       kma_run,
                                                        "DisinFinder",
                                                        conf)
     ##########################################################################
     # PointFinder
     ##########################################################################
 
-    if(conf.point):
+    if (conf.point):
 
         blast_results = None
         kma_run = None
@@ -400,7 +421,7 @@ def main():
                              ignore_indels=conf.ignore_indels,
                              ignore_stop_codons=conf.ignore_stop_codons)
 
-        if(conf.inputfasta):
+        if (conf.inputfasta):
 
             method = PointFinder.TYPE_BLAST
 
@@ -415,7 +436,7 @@ def main():
         else:
 
             method = PointFinder.TYPE_KMA
-            if(conf.nanopore):
+            if (conf.nanopore):
                 kma_run = finder.kma(inputfile_1=conf.inputfastq_1,
                                      inputfile_2=conf.inputfastq_2,
                                      out_path=conf.outPath_point_kma,
@@ -445,15 +466,15 @@ def main():
 
             results = kma_run.results
 
-        if(conf.specific_gene):
+        if (conf.specific_gene):
             results = PointFinder.discard_from_dict(
                 in_dict=results, wanted_list=conf.specific_gene)
 
-        if(method == PointFinder.TYPE_BLAST):
+        if (method == PointFinder.TYPE_BLAST):
             results_pnt = finder.find_best_seqs(results, conf.pf_gene_cov)
         else:
             results_pnt = results[finder.species]
-            if(results_pnt == "No hit found"):
+            if (results_pnt == "No hit found"):
                 results_pnt = {}
             else:
                 results_pnt["excluded"] = results["excluded"]
@@ -482,11 +503,11 @@ def main():
     isolate = Isolate(name=conf.sample_name, species=conf.species,
                       amr_panel_file=conf.db_panels_file)
 
-    if(conf.acquired or conf.disinf):
+    if (conf.acquired or conf.disinf):
         isolate.load_finder_results(std_table=std_result,
                                     phenodb=res_pheno_db,
                                     type="seq_regions")
-    if(conf.point):
+    if (conf.point):
         isolate.load_finder_results(std_table=std_result,
                                     phenodb=res_pheno_db,
                                     type="seq_variations")
@@ -495,7 +516,7 @@ def main():
     ResFinderResultHandler.load_res_profile(std_result, isolate,
                                             conf.amr_abbreviations)
 
-    if(conf.out_json):
+    if (conf.out_json):
         std_result_file = conf.out_json
     else:
         std_result_file = "{}/{}.json".format(
@@ -507,7 +528,7 @@ def main():
     pheno_profile_str = isolate.profile_to_str_table(header=True)
 
     # TODO: REMOVE THE NEED FOR THE PICKLED FILE
-    if(conf.pickle):
+    if (conf.pickle):
         isolate_pickle = open("{}/isolate.p".format(conf.outputPath), "wb")
         pickle.dump(isolate, isolate_pickle, protocol=2)
 
@@ -515,7 +536,7 @@ def main():
     with open(pheno_table_file, 'w') as fh:
         fh.write(pheno_profile_str)
 
-    if(conf.species is not None):
+    if (conf.species is not None):
         # Apply AMR panel
         input_amr_panels = "{}/phenotype_panels.txt".format(conf.db_path_res)
         res_sum_table = ResSumTable(pheno_profile_str)
@@ -527,8 +548,9 @@ def main():
         # If specified species does not have an associated panel, just ignore it
         # and exit.
         except PanelNameError:
-            eprint("Warning: No panel was detected for the species: {}"
-                   .format(conf.species))
+            if conf.species != 'other':
+                eprint("Warning: No panel was detected for the species: {}"
+                       .format(conf.species))
             sys.exit()
 
         amr_panel_filename = conf.species.replace(" ", "_")
@@ -541,6 +563,7 @@ def main():
             fh.write(panel_profile_str)
 
     return 0
+
 
 if __name__ == '__main__':
     sys.exit(main())
