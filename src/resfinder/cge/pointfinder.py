@@ -43,6 +43,7 @@ class PointFinder(CGEFinder):
     PHENOTYPE_FILE = "phenotypes.txt"
     # Deprecated variable, use phenotype (kept for legacy dbs)
     RES_OVERVIEW_FILE = "resistens-overview.txt"
+    PROMOTER_REGEX = r"(.+promoter)-size-(\d+)(?:bp)"
 
     def __init__(self, db_path, species, gene_list=None, ignore_indels=False,
                  ignore_stop_codons=False):
@@ -56,6 +57,8 @@ class PointFinder(CGEFinder):
 
         self.gene_list = PointFinder.get_file_content(
             f"{self.specie_path}/{self.GENE_FILE}")
+
+        self.promoters = PointFinder.load_promoters(self.gene_list)
 
         if os.path.isfile(f"{self.specie_path}/{self.RNA_GENE_FILE}"):
             self.RNA_gene_list = PointFinder.get_file_content(
@@ -81,6 +84,19 @@ class PointFinder(CGEFinder):
                           f"'{self.PHENOTYPE_FILE}' file (current database) or"
                           "the '{self.RES_OVERVIEW_FILE}' file "
                           "(legacy database)")
+
+    @staticmethod
+    def load_promoters(gene_file_list):
+        promoters = {}
+
+        for gene_filename in gene_file_list:
+            promoter_match = re.search(PointFinder.PROMOTER_REGEX, gene_filename)
+            if promoter_match:
+                promoter_key = promoter_match.group(1)
+                promoter_length = promoter_match.group(2)
+                promoters[promoter_key] = int(promoter_length)
+        
+        return promoters
 
     def get_user_defined_gene_list(self, gene_list):
         genes_specified = []
@@ -255,12 +271,7 @@ class PointFinder(CGEFinder):
         for gene, hit in GENES.items():
             # Start writing output string (to HTML tab file)
             gene_name = gene.split("_")[0]  # Not perfeft can differ from specific mutation
-            regex = r"promoter-size-(\d+)(?:bp)"
-            promtr_gene_objt = re.search(regex, gene_name)
-
-            if promtr_gene_objt:
-                gene_name = gene.split("_")[0]
-
+            gene_name = PhenoDB.if_promoter_gene_rename(gene_name)
             output_strings[1] += "\n%s\n" % (gene_name)
 
             # Ignore excluded genes
@@ -421,7 +432,11 @@ class PointFinder(CGEFinder):
                                      f"_{mis_match[3].lower()}")
                 mis_match_key_aa = (f"{gene_db_id}_{mis_match[1]}"
                                     f"_{mis_match[-1].lower()}")
-            elif mis_match[4].startswith('r.'):#RNA substitution
+            elif mis_match[4].startswith('r.'):  # RNA substitution
+                mis_match_key_aa = ""
+                mis_match_key_nuc = (f"{gene_db_id}_{mis_match[2]}"
+                                     f"_{mis_match[3].lower()}")
+            elif mis_match[4].startswith('n.'):  # non-coding DNA substitution
                 mis_match_key_aa = ""
                 mis_match_key_nuc = (f"{gene_db_id}_{mis_match[2]}"
                                      f"_{mis_match[3].lower()}")
@@ -621,6 +636,7 @@ class PointFinder(CGEFinder):
             gene_name = str(mutation[0].split("_")[0])
             # Only consider mutations in genes found in the gene list
             if gene_name in gene_list:
+                gene_name = PhenoDB.if_promoter_gene_rename(gene_name)
                 mut_pos = int(mutation[3])
                 ref_codon = mutation[4]                     # Ref_nuc (1 or 3?)
                 ref_aa = mutation[5]                        # Ref_codon
@@ -930,13 +946,8 @@ class PointFinder(CGEFinder):
                                                                  qry_seq)
         else:
             # Check if the gene sequence is with a promoter
-            regex = r"promoter-size-(\d+)(?:bp)"
-            promtr_gene_objt = re.search(regex, gene)
-
-            # Check for promoter sequences
-            if promtr_gene_objt:
-                # Get promoter length
-                promtr_len = int(promtr_gene_objt.group(1))
+            promtr_len = self.promoters.get(gene_name, None)
+            if promtr_len is not None:
 
                 # Extract promoter sequence, while considering gaps
                 # --------agt-->----

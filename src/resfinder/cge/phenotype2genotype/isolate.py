@@ -234,7 +234,7 @@ class Isolate(dict):
                               f"_{feat_res_dict['nuc_change']}")
                 aa_format = (f"{feat_res_dict['seq_regions'][0]}"
                              f"_{feat_res_dict['ref_start_pos']}"
-                             f"_{feat_res_dict['var_aa']}")
+                             f"_{var_aa}")  # var_aa can be None
                 return nuc_format, aa_format
             # Amino acid mutation
             else:
@@ -395,7 +395,7 @@ class Isolate(dict):
         hit = DBHit(name=gene_info["name"],
                     identity=gene_info["identity"],
                     match_length=gene_info["alignment_length"],
-                    ref_length=gene_info["ref_seq_lenght"],
+                    ref_length=gene_info["ref_seq_length"],
                     start_ref=gene_info["ref_start_pos"],
                     end_ref=gene_info["ref_end_pos"],
                     acc=gene_info["ref_acc"],

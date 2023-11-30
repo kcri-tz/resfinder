@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.4.2] - 2023-11-27
+
+### Fixed
+
+- Issue where mutations in promoters that are not indels (i.e. substitutions) could be missed as they were uncorrectly registered as unknown mutations.
+
+## [4.4.1] - 2023-11-02
+
+### Fixed
+
+- Issue where mutations in promoters could be missed if using fastq files as input. Issue continues to persist for PointFinder database versions < 4.0.1
+
+## [4.4.0] - 2023-10-27
+
+### Fixed
+
+- Issue where application crashed with a "KeyError: 'var_aa'", when finding mutation in promoters.
+- Issue where PointFinder database reference sequence names containing "promoter-size-\d+bp" would be missed. Issue continues to persist for PointFinder database versions < 4.0.0
+- Spelling error in json output "ref_seq_lenght". It is now "ref_seq_length"
+
 ## [4.3.3] - 2023-08-22
 
 ### Fixed

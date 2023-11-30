@@ -611,6 +611,22 @@ class PhenoDB(dict):
         return out_string
 
     @staticmethod
+    def if_promoter_gene_rename(s):
+        """ 
+            Needed instead of if_promoter_rename() when only gene name is
+            present without variant number and acc no 
+        """
+        out_string = s
+
+        regex = r"^(.+-promoter)-size-\d+bp$"
+        promoter_match = re.search(regex, s)
+
+        if promoter_match:
+            out_string = f"{promoter_match.group(1)}"
+
+        return out_string
+
+    @staticmethod
     def get_csv_tuple(csv_string, sep=",", lower=True):
         """ Takes a string containing a comma seperated list, makes it all
             lower case, remove empty entries, remove trailing and preseeding

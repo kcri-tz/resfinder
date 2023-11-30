@@ -282,37 +282,25 @@ def main():
                                                        conf)
 
         else:
-            if (conf.nanopore):
-                kma_run = acquired_finder.kma(
-                    inputfile_1=conf.inputfastq_1,
-                    inputfile_2=conf.inputfastq_2,
-                    out_path=conf.outPath_res_kma,
-                    db_path_kma=conf.db_path_res_kma,
-                    min_cov=conf.rf_gene_cov,
-                    threshold=conf.rf_gene_id,
-                    kma_path=conf.kma,
-                    databases=acquired_finder.databases,
-                    sample_name="",
-                    kma_cge=True,
-                    kma_apm="p",
-                    kma_1t1=True,
-                    kma_add_args='-ont -md 5'
-                )
-            else:
-                kma_run = acquired_finder.kma(
-                    inputfile_1=conf.inputfastq_1,
-                    inputfile_2=conf.inputfastq_2,
-                    out_path=conf.outPath_res_kma,
-                    db_path_kma=conf.db_path_res_kma,
-                    min_cov=conf.rf_gene_cov,
-                    threshold=conf.rf_gene_id,
-                    kma_path=conf.kma,
-                    databases=acquired_finder.databases,
-                    sample_name="",
-                    kma_cge=True,
-                    kma_apm="p",
-                    kma_1t1=True
-                )
+            kma_nano_args = None
+            if conf.nanopore:
+                kma_nano_args = '-ont -md 5'
+
+            kma_run = acquired_finder.kma(
+                inputfile_1=conf.inputfastq_1,
+                inputfile_2=conf.inputfastq_2,
+                out_path=conf.outPath_res_kma,
+                db_path_kma=conf.db_path_res_kma,
+                min_cov=conf.rf_gene_cov,
+                threshold=conf.rf_gene_id,
+                kma_path=conf.kma,
+                databases=acquired_finder.databases,
+                sample_name="",
+                kma_cge=True,
+                kma_apm="p",
+                kma_1t1=True,
+                kma_add_args=kma_nano_args
+            )
 
             # DEPRECATED
             # TODO: make a write method that depends on the json output
@@ -363,37 +351,25 @@ def main():
                                                        conf)
 
         else:
-            if (conf.nanopore):
-                kma_run = disinf_finder.kma(
-                    inputfile_1=conf.inputfastq_1,
-                    inputfile_2=conf.inputfastq_2,
-                    out_path=conf.outPath_disinf_kma,
-                    db_path_kma=conf.db_path_disinf_kma,
-                    min_cov=conf.dis_gene_cov,
-                    threshold=conf.dis_gene_id,
-                    kma_path=conf.kma,
-                    databases=disinf_finder.databases,
-                    sample_name="",
-                    kma_cge=True,
-                    kma_apm="p",
-                    kma_1t1=True,
-                    kma_add_args='-ont -md 5'
-                )
-            else:
-                kma_run = disinf_finder.kma(
-                    inputfile_1=conf.inputfastq_1,
-                    inputfile_2=conf.inputfastq_2,
-                    out_path=conf.outPath_disinf_kma,
-                    db_path_kma=conf.db_path_disinf_kma,
-                    min_cov=conf.dis_gene_cov,
-                    threshold=conf.dis_gene_id,
-                    kma_path=conf.kma,
-                    databases=disinf_finder.databases,
-                    sample_name="",
-                    kma_cge=True,
-                    kma_apm="p",
-                    kma_1t1=True
-                )
+            kma_nano_args = None
+            if conf.nanopore:
+                kma_nano_args = '-ont -md 5'
+
+            kma_run = disinf_finder.kma(
+                inputfile_1=conf.inputfastq_1,
+                inputfile_2=conf.inputfastq_2,
+                out_path=conf.outPath_disinf_kma,
+                db_path_kma=conf.db_path_disinf_kma,
+                min_cov=conf.dis_gene_cov,
+                threshold=conf.dis_gene_id,
+                kma_path=conf.kma,
+                databases=disinf_finder.databases,
+                sample_name="",
+                kma_cge=True,
+                kma_apm="p",
+                kma_1t1=True,
+                kma_add_args=kma_nano_args
+            )
 
             # DEPRECATED
             # TODO: make a write method that depends on the json output
@@ -434,38 +410,30 @@ def main():
             results = blast_run.results
 
         else:
-
+            kma_nano_args = None
+            if conf.nanopore:
+                kma_nano_args = '-ont -md 5'
+            
             method = PointFinder.TYPE_KMA
-            if (conf.nanopore):
-                kma_run = finder.kma(inputfile_1=conf.inputfastq_1,
-                                     inputfile_2=conf.inputfastq_2,
-                                     out_path=conf.outPath_point_kma,
-                                     db_path_kma=conf.db_path_point,
-                                     databases=[conf.species_dir],
-                                     min_cov=0.01,  # Sorts on coverage later
-                                     threshold=conf.pf_gene_id,
-                                     kma_path=conf.kma,
-                                     sample_name=conf.sample_name,
-                                     kma_cge=True,
-                                     kma_apm="p",
-                                     kma_1t1=True,
-                                     kma_add_args='-ont -md 5')
-            else:
-                kma_run = finder.kma(inputfile_1=conf.inputfastq_1,
-                                     inputfile_2=conf.inputfastq_2,
-                                     out_path=conf.outPath_point_kma,
-                                     db_path_kma=conf.db_path_point,
-                                     databases=[conf.species_dir],
-                                     min_cov=0.01,  # Sorts on coverage later
-                                     threshold=conf.pf_gene_id,
-                                     kma_path=conf.kma,
-                                     sample_name=conf.sample_name,
-                                     kma_cge=True,
-                                     kma_apm="p",
-                                     kma_1t1=True)
+            
+            kma_run = finder.kma(inputfile_1=conf.inputfastq_1,
+                                    inputfile_2=conf.inputfastq_2,
+                                    out_path=conf.outPath_point_kma,
+                                    db_path_kma=conf.db_path_point,
+                                    databases=[conf.species_dir],
+                                    min_cov=0.01,  # Sorts on coverage later
+                                    threshold=conf.pf_gene_id,
+                                    kma_path=conf.kma,
+                                    sample_name=conf.sample_name,
+                                    kma_cge=True,
+                                    kma_apm="p",
+                                    kma_1t1=True,
+                                    kma_add_args=kma_nano_args)
 
             results = kma_run.results
-
+        
+        PointFinderResultHandler.rename_promoter_results(results, method)
+        
         if (conf.specific_gene):
             results = PointFinder.discard_from_dict(
                 in_dict=results, wanted_list=conf.specific_gene)

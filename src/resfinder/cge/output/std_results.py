@@ -2,6 +2,7 @@
 import random
 import string
 import json
+import re
 
 from ..phenotype2genotype.res_profile import PhenoDB
 from ..phenotype2genotype.feature import ResGene, ResMutation
@@ -11,6 +12,7 @@ from .gene_result import GeneResult
 from .seq_variation_result import SeqVariationResult
 from .phenotype_result import PhenotypeResult
 
+from ..pointfinder import PointFinder
 
 def add_gene_result_if_key_not_None(gene_result, res_collection):
     '''
@@ -190,3 +192,27 @@ class PointFinderResultHandler():
                         res_collection, mismatch, gene_results, ref_db_name)
                     res_collection.add_class(cl="seq_variations",
                                                 **seq_var_result)
+
+    @staticmethod
+    def rename_promoter_results(results, method):
+        if method == PointFinder.TYPE_BLAST:
+            PointFinderResultHandler._rename_blast_promoter_results(results)
+        else:
+            PointFinderResultHandler._rename_kma_promoter_results(results)
+    
+    def _rename_blast_promoter_results(results):
+        promoter_keys = [k for k in results if re.search(r"promoter-size", k)]
+        for promoter_key in promoter_keys:
+            val_dict = results.pop(promoter_key)
+            new_promoter_key = PhenoDB.if_promoter_gene_rename(promoter_key)
+            results[new_promoter_key] = val_dict
+    
+    def _rename_kma_promoter_results(results):
+        promoter_keys = set()
+
+        for inner_dict in results.values():
+            promoter_keys = [k for k in inner_dict if re.search(r"promoter-size", k)]
+            for promoter_key in promoter_keys:
+                val_dict = inner_dict.pop(promoter_key)
+                new_promoter_key = PhenoDB.if_promoter_gene_rename(promoter_key)
+                inner_dict[new_promoter_key] = val_dict

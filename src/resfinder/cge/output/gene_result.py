@@ -30,7 +30,7 @@ class GeneResult(dict):
         self["ref_database"] = [res_collection.get_db_key(db_name)[0]]
         self["identity"] = res["perc_ident"]
         self["alignment_length"] = res["HSP_length"]
-        self["ref_seq_lenght"] = res["sbjct_length"]
+        self["ref_seq_length"] = res["sbjct_length"]
         self["depth"] = res.get("depth", None)
         self["ref_start_pos"] = res["sbjct_start"]
         self["ref_end_pos"] = res["sbjct_end"]
