@@ -97,6 +97,9 @@ class PhenoDB(dict):
 
                     # line = line.encode("latin_1")
                     line = line.rstrip()
+                    # Skip empty lines
+                    if not line:
+                        continue
                     line_list = line.split("\t")
                     line_list = list(map(str.rstrip, line_list))
 

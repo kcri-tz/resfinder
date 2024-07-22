@@ -14,6 +14,7 @@ from .feature import Feature, ResGene, Mutation, ResMutation
 from .phenodbpoint import PhenoDBPoint
 from .res_profile import PhenoDB, ResProfile, FeatureGroup
 from .dbhit import DBHit
+from ..output.exceptions import DatabaseError
 
 
 class Isolate(dict):
@@ -325,6 +326,15 @@ class Isolate(dict):
         if phenotype is None:
             ab_class.add(Isolate.NO_AB_CLASS)
             db_pheno = None
+            if type == "seq_regions":
+                ref_id = feat_info.get("ref_id", None)
+                raise DatabaseError(
+                    f"Phenotype not found for sequence region: {ref_id}.\n"
+                    "If this application was run with an official database, "
+                    "please contact the curators.\n"
+                    "If this application was run with a custom database, "
+                    "please check that your phenotype file contains all "
+                    "sequence regions.")
         else:
             for ab in phenotype.antibiotics:
                 ab_class.update(ab.classes)

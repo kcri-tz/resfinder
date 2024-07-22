@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unlreleased
+
+### Fixed
+- Empty lines in phenotype file, no longer causes ResFinder to crash.
+
+## [4.5.0] - 2024-03-22
+
+### Added
+
+- More informative error message (of type: cge.output.exception.DataBaseError) if the application encounters resistance genes, which does not have phenotype information. Missing phenotype information is in itself a bug, and should be fixed if encountered.
+
+### Changed
+
+- All exceptions specific to ResFinder to inherit the ResFinderError class.
+
+### Fixed
+
+- Newly added ResFinder genes were missing phenotypic information.
+
+## [4.4.3] - 2024-03-08
+
+### Fixed
+
+- Issue where mutations not in promoters, and not found in the first fragment of a fragmented gene assembly was missed.
+
 ## [4.4.2] - 2023-11-27
 
 ### Fixed

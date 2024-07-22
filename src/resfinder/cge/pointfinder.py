@@ -1033,13 +1033,14 @@ class PointFinder(CGEFinder):
         mis_matches = []
 
         sbjct_start = abs(sbjct_start)
-        seq_pos = sbjct_start
 
         # Set variables depending on promoter status
+        seq_pos = 1
         factor = 1
         mut_prefix = "r."
 
         if promoter is True:
+            seq_pos = sbjct_start
             factor = (-1)
             mut_prefix = "n."
             # Reverse promoter sequences
@@ -1048,7 +1049,7 @@ class PointFinder(CGEFinder):
 
         # Go through sequences one nucleotide at a time
         shift = 0
-        for index in range(sbjct_start - 1, len(sbjct_seq)):
+        for index in range(seq_pos - 1, len(sbjct_seq)):
             mut_name = mut_prefix
             mut = ""
             # Shift index according to gaps
@@ -1338,7 +1339,7 @@ class PointFinder(CGEFinder):
         return gap_indel
 
     @staticmethod
-    def get_indels(sbjct_seq, qry_seq, start_pos):
+    def get_aa_indels(sbjct_seq, qry_seq, start_pos):
         """
         This function uses regex to find inserts and deletions in
         sequences given as arguments. A list of these indels are
@@ -1366,6 +1367,7 @@ class PointFinder(CGEFinder):
 
                 # Find codon number for mutation
                 codon_no = int(math.ceil((sbj_pos) / 3))
+                ref_codon_end = int(math.ceil((sbj_pos + len(gap)) / 3))
                 qry_pos = len(qry_seq[:pos].replace("-", "")) + start_pos
                 qry_codon = int(math.ceil((qry_pos) / 3))
 
@@ -1374,7 +1376,8 @@ class PointFinder(CGEFinder):
                 else:
                     mut = "del"
 
-                indels.append([mut, codon_no, sbj_pos, indel, qry_codon])
+                # indels.append([mut, codon_no, sbj_pos, indel, qry_codon])
+                indels.append([mut, codon_no, ref_codon_end, indel, qry_codon])
 
         # Sort indels based on codon position and sequence position
         indels = sorted(indels, key=lambda x: (x[1], x[2]))
@@ -1442,7 +1445,7 @@ class PointFinder(CGEFinder):
         if not self.ignore_indels:
             # Find inserts and deletions in sequence
             indel_no = 0
-            indels = PointFinder.get_indels(sbjct_seq, qry_seq, sbjct_start)
+            indels = PointFinder.get_aa_indels(sbjct_seq, qry_seq, sbjct_start)
 
         # Go through sequence and save mutations when found
         for index in range(0, len(sbjct_seq), 3):
@@ -1534,8 +1537,7 @@ class PointFinder(CGEFinder):
                         if "Frameshift" in mut_name:
                             mut_name = (mut_name.split("-")[0]
                                         + "- Frame restored")
-                        if mut_name == "p.V940delins - Frame restored":
-                            sys.exit()
+
                     mis_matches += [[mut, codon_no_indel, seq_pos, indel,
                                      mut_name, sbjct_rf_indel, qry_rf_indel,
                                      aa_ref, aa_alt]]
