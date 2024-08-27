@@ -5,10 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unlreleased
+## [4.6.0] - 2024-08-08
+
+### Added
+
+- List of species recognized by ResFinder.
+
+### Changed
+
+- PDM build dependency pdm-pep517 to pdm-backend.
 
 ### Fixed
+
 - Empty lines in phenotype file, no longer causes ResFinder to crash.
+- erm(B)_7 removed as it was a duplicate
+- Added the phenotype Ceftazidime+Avibactam to blaNDM-1
+- Added the phenotype Aztreonam to blaPME-1
 
 ## [4.5.0] - 2024-03-22
 
